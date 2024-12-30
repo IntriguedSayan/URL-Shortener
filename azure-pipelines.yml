@@ -41,17 +41,21 @@ stages:
         
       displayName: 'npm install, build and test'
 
-    - task: CopyFiles@2
+    - task: ArchiveFiles@2
       inputs:
-        Contents: '**'
-        TargetFolder: $(Build.ArtifactStagingDirectory)
-      displayName: 'Copy files to staging directory' 
+        rootFolderOrFile: $(Build.ArtifactStagingDirectory)
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+      displayName: 'Archive files' 
 
     - task: PublishBuildArtifacts@1
       inputs:
-          pathToPublish: $(Build.ArtifactStagingDirectory)
+          pathToPublish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
           artifactName: drop
       displayName: 'Publish build artifacts'
+
 - stage: Deploy
   displayName: Deploy stage
   dependsOn: Build
