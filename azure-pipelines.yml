@@ -1,95 +1,38 @@
-# Node.js Express Web App to Linux on Azure
-# Build a Node.js Express app and deploy it to Azure as a Linux web app.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - main
 
+pool:
+  vmImage: 'ubuntu-latest'
+
 variables:
-
-  # Azure Resource Manager connection created during pipeline creation
   azureSubscription: 'NewAzureRMConnection'
-
-  # Web app name
   webAppName: 'FirstExpressApp777'
-
-  # Environment name
   environmentName: 'FirstExpressApp777'
 
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+steps:
+- script: npm install
+  displayName: 'Install Dependencies (Dev)'
 
-pool:
-  name: 'Default'
+- script: npm run build
+  displayName: 'Build Node.js App'
 
-stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-    - job: BuildJob
-      steps:
-      - script: npm install
-        displayName: 'Install Dependencies'
-        workingDirectory: $(System.DefaultWorkingDirectory)
-        
-      - script: npm run build
-        displayName: 'Build Node.js App'
-        workingDirectory: $(System.DefaultWorkingDirectory)
-        
-      - task: CopyFiles@2
-        displayName: 'Copy Files to Artifact Staging'
-        inputs:
-          SourceFolder: $(System.DefaultWorkingDirectory)
-          Contents: '**'
-          TargetFolder: $(Build.ArtifactStagingDirectory)
-        
-      - task: PublishPipelineArtifact@1
-        displayName: 'Publish Artifact'
-        inputs:
-          artifactName: 'drop'
-          targetPath: $(Build.ArtifactStagingDirectory)
-      - task: ArchiveFiles@2
-        inputs:
-          rootFolderOrFile: $(Build.ArtifactStagingDirectory)
-          includeRootFolder: false
-          archiveType: zip
-          archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-          replaceExistingArchive: true
-        displayName: 'Archive files' 
+- task: ArchiveFiles@2
+  displayName: 'Archive files'
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
 
-      - task: PublishBuildArtifacts@1
-        inputs:
-          pathToPublish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-          artifactName: drop
-      displayName: 'Publish build artifacts'
+- script: npm install
+  displayName: 'Install Dependencies (Prod)'
 
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - deployment: DeployJob
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: DownloadPipelineArtifact@2
-            displayName: 'Download Artifact'
-            inputs:
-              artifactName: 'drop'
-              targetPath: $(System.DefaultWorkingDirectory)
-              
-          - script: npm install --production
-            displayName: 'Install Dependencies'
-            workingDirectory: $(System.DefaultWorkingDirectory)
-            
-          - task: AzureRmWebAppDeployment@4
-            displayName: 'Azure App Service Deploy'
-            inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: $(azureSubscription)
-              appType: 'webAppLinux'
-              WebAppName: $(webAppName)
-              packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Azure App Service Deploy'
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: '$(azureSubscription)'
+    appType: 'webAppLinux'
+    WebAppName: '$(webAppName)'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
