@@ -73,7 +73,7 @@ stages:
             displayName: 'Azure App Service Deploy'
             inputs:
               ConnectionType: 'AzureRM'
-              azureSubscription: '<AzureSubscriptionName>'
+              azureSubscription: 'Free Trial (da2609b4-1d2e-40dc-8ced-cf4b01cd356a)'
               appType: 'webAppLinux'
-              WebAppName: '<AppServiceName>'
+              WebAppName: '$(webAppName)'
               packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
