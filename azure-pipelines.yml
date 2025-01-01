@@ -9,7 +9,7 @@ trigger:
 variables:
 
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'c8aed0d9-3ff2-439e-aecb-cf9ce4698ed6'
+  azureSubscription: '66b8fb8e-12ec-4721-8f99-a1955f44dc23'
 
   # Web app name
   webAppName: 'FirstExpressApp777'
@@ -37,7 +37,7 @@ stages:
 
     - script: |
         npm install
-        npm run build --if-present
+        npm run build
         
       displayName: 'npm install, build and test'
 
