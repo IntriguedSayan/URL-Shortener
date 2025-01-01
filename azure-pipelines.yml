@@ -21,7 +21,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 pool:
-  name: 'Azure Pipelines'
+  name: 'Default'
 
 stages:
 - stage: Build
