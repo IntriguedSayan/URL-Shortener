@@ -1,23 +1,30 @@
 trigger:
 - main
 
+# Use a single pool/job to ensure everything runs in sequence on one agent
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
+  # Azure Resource Manager service connection name
   azureSubscription: 'NewAzureRMConnection'
+
+  # Web app name
   webAppName: 'FirstExpressApp777'
-  environmentName: 'FirstExpressApp777'
 
 steps:
-- script: npm install
+- script: |
+    echo "Installing dependencies (development)"
+    npm install
   displayName: 'Install Dependencies (Dev)'
 
-- script: npm run build
+- script: |
+    echo "Building Node.js App"
+    npm run build
   displayName: 'Build Node.js App'
 
 - task: ArchiveFiles@2
-  displayName: 'Archive files'
+  displayName: 'Archive Files'
   inputs:
     rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
     includeRootFolder: false
@@ -25,7 +32,9 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
     replaceExistingArchive: true
 
-- script: npm install
+- script: |
+    echo "Installing dependencies (production)"
+    npm install --production
   displayName: 'Install Dependencies (Prod)'
 
 - task: AzureRmWebAppDeployment@4
