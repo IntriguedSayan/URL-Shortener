@@ -13,16 +13,29 @@ variables:
   webAppName: 'FirstExpressApp777'
 
 steps:
+- task: UseNode@1
+  inputs:
+    version: '20.x'
+- task: Cache@2
+  inputs:
+    key: 'node | "$(Agent.OS)" | package-lock.json'
+    path: 'node_modules'
+    cacheHitVar: 'CACHE_RESTORED'
 - script: |
     echo "Installing dependencies (development)"
     npm install
   displayName: 'Install Dependencies (Dev)'
-
 - script: |
     echo "Building Node.js App"
     npm run build
   displayName: 'Build Node.js App'
-
+- script: |
+    echo "Cleaning up node_modules"
+    rm -rf ./node_modules
+- script: |
+    echo "Installing dependencies (production)"
+    npm install
+  displayName: 'Install Dependencies (Prod)'
 - task: ArchiveFiles@2
   displayName: 'Archive Files'
   inputs:
@@ -32,10 +45,6 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
     replaceExistingArchive: true
 
-- script: |
-    echo "Installing dependencies (production)"
-    npm install --production
-  displayName: 'Install Dependencies (Prod)'
 
 - task: AzureRmWebAppDeployment@4
   displayName: 'Azure App Service Deploy'
