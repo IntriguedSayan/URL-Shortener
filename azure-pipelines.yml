@@ -3,7 +3,7 @@ trigger:
 
 # Use a single pool/job to ensure everything runs in sequence on one agent
 pool:
-  name: 'SelfHostedAgent1'
+  name: 'Default'
 
 variables:
   # Azure Resource Manager service connection name
