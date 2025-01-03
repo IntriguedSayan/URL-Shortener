@@ -30,13 +30,8 @@ steps:
     npm run build
   displayName: 'Build Node.js App'
 - script: |
-    if [ "$(uname)" == "Linux" ]; then
-      echo "Cleaning up node_modules on Linux"
-      rm -rf ./node_modules
-    else
       echo "Cleaning up node_modules on Windows"
       rmdir /s /q node_modules
-    fi
   displayName: 'Clean node_modules'
 
 - script: |
